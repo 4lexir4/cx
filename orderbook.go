@@ -114,8 +114,8 @@ func (l *Limit) DeleteOrder(o *Order) {
 }
 
 type Orderbook struct {
-	Asks []*Limit
-	Bids []*Limit
+	asks []*Limit
+	bids []*Limit
 
 	AskLimits map[float64]*Limit
 	BidLimits map[float64]*Limit
@@ -123,8 +123,8 @@ type Orderbook struct {
 
 func NewOrderbook() *Orderbook {
 	return &Orderbook{
-		Asks:      []*Limit{},
-		Bids:      []*Limit{},
+		asks:      []*Limit{},
+		bids:      []*Limit{},
 		AskLimits: make(map[float64]*Limit),
 		BidLimits: make(map[float64]*Limit),
 	}
@@ -144,11 +144,21 @@ func (ob *Orderbook) PlaceLimitOrder(price float64, o *Order) {
 		limit.AddOrder(o)
 
 		if o.Bid {
-			ob.Bids = append(ob.Bids, limit)
+			ob.bids = append(ob.bids, limit)
 			ob.BidLimits[price] = limit
 		} else {
-			ob.Asks = append(ob.Asks, limit)
+			ob.asks = append(ob.asks, limit)
 			ob.AskLimits[price] = limit
 		}
 	}
+}
+
+func (ob *Orderbook) Asks() []*Limit {
+	sort.Sort(ByBestAsk{ob.asks})
+	return ob.asks
+}
+
+func (ob *Orderbook) Bids() []*Limit {
+	sort.Sort(ByBestBid{ob.bids})
+	return ob.bids
 }

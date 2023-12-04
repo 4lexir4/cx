@@ -35,5 +35,5 @@ func TestPlaceLimitOrder(t *testing.T) {
 	ob.PlaceLimitOrder(10_000, sellOrderA)
 	ob.PlaceLimitOrder(9_000, sellOrderB)
 
-	assert(t, len(ob.Asks), 2)
+	assert(t, len(ob.asks), 2)
 }
