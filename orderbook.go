@@ -273,6 +273,11 @@ func (ob *Orderbook) clearLimit(bid bool, l *Limit) {
 	}
 }
 
+func (ob *Orderbook) CancelOrder(o *Order) {
+	limit := o.Limit
+	limit.DeleteOrder(o)
+}
+
 func (ob *Orderbook) BidTotalVolume() float64 {
 	totalVolume := 0.0
 
