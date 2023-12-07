@@ -114,7 +114,15 @@ func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
 	ob := ex.orderbooks[market]
 	order := orderbook.NewOrder(placeOrderData.Bid, placeOrderData.Size)
 
-	ob.PlaceLimitOrder(placeOrderData.Price, order)
+	if placeOrderData.Type == LimitOrder {
+		ob.PlaceLimitOrder(placeOrderData.Price, order)
+		return c.JSON(200, map[string]any{"msg": "limit order placed"})
+	}
 
-	return c.JSON(200, map[string]any{"msg": "order placed"})
+	if placeOrderData.Type == MarketOrder {
+		matches := ob.PlaceMarketOrder(order)
+		return c.JSON(200, map[string]any{"matches": len(matches)})
+	}
+
+	return nil
 }
