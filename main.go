@@ -53,6 +53,7 @@ type PlaceOrderRequest struct {
 }
 
 type Order struct {
+	ID        int64
 	Price     float64
 	Size      float64
 	Bid       bool
@@ -83,6 +84,7 @@ func (ex *Exchange) handleGetBook(c echo.Context) error {
 	for _, limit := range ob.Asks() {
 		for _, order := range limit.Orders {
 			o := Order{
+				ID:        order.ID,
 				Price:     limit.Price,
 				Size:      order.Size,
 				Bid:       order.Bid,
@@ -105,6 +107,10 @@ func (ex *Exchange) handleGetBook(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, orderbookData)
+}
+
+func (ex *Exchange) cancelOrder(c echo.Context) error {
+	return nil
 }
 
 func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
