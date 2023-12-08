@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/4lexir4/cx/orderbook"
 	"github.com/labstack/echo/v4"
@@ -14,6 +15,7 @@ func main() {
 
 	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
+	e.DELETE("/order/:id", ex.cancelOrder)
 
 	e.Start(":3000")
 }
@@ -110,6 +112,36 @@ func (ex *Exchange) handleGetBook(c echo.Context) error {
 }
 
 func (ex *Exchange) cancelOrder(c echo.Context) error {
+	idStr := c.Param("id")
+	id, _ := strconv.Atoi(idStr)
+	ob := ex.orderbooks[MarketETH]
+	orderCanceled := false
+
+	for _, limit := range ob.Asks() {
+		for _, order := range limit.Orders {
+			if order.ID == int64(id) {
+				ob.CancelOrder(order)
+				orderCanceled = true
+			}
+
+			if orderCanceled {
+				break
+			}
+		}
+	}
+
+	for _, limit := range ob.Bids() {
+		for _, order := range limit.Orders {
+			if order.ID == int64(id) {
+				ob.CancelOrder(order)
+				orderCanceled = true
+			}
+
+			if orderCanceled {
+				return c.JSON(200, map[string]any{"msg": "order canceled"})
+			}
+		}
+	}
 	return nil
 }
 
