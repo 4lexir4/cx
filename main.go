@@ -125,7 +125,7 @@ func (ex *Exchange) cancelOrder(c echo.Context) error {
 			}
 
 			if orderCanceled {
-				break
+				return c.JSON(200, map[string]any{"msg": "order canceled"})
 			}
 		}
 	}
