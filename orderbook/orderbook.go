@@ -24,17 +24,11 @@ type Order struct {
 
 type Orders []*Order
 
-func (o Orders) Len() int {
-	return len(o)
-}
+func (o Orders) Len() int { return len(o) }
 
-func (o Orders) Swap(i, j int) {
-	o[i], o[j] = o[j], o[i]
-}
+func (o Orders) Swap(i, j int) { o[i], o[j] = o[j], o[i] }
 
-func (o Orders) Less(i, j int) bool {
-	return o[i].Timestamp < o[j].Timestamp
-}
+func (o Orders) Less(i, j int) bool { return o[i].Timestamp < o[j].Timestamp }
 
 func NewOrder(bid bool, size float64) *Order {
 	return &Order{
@@ -49,9 +43,7 @@ func (o *Order) String() string {
 	return fmt.Sprintf("[size: %.2f]", o.Size)
 }
 
-func (o *Order) IsFilled() bool {
-	return o.Size == 0.0
-}
+func (o *Order) IsFilled() bool { return o.Size == 0.0 }
 
 type Limit struct {
 	Price       float64
@@ -63,31 +55,19 @@ type Limits []*Limit
 
 type ByBestAsk struct{ Limits }
 
-func (a ByBestAsk) Len() int {
-	return len(a.Limits)
-}
+func (a ByBestAsk) Len() int { return len(a.Limits) }
 
-func (a ByBestAsk) Swap(i, j int) {
-	a.Limits[i], a.Limits[j] = a.Limits[j], a.Limits[i]
-}
+func (a ByBestAsk) Swap(i, j int) { a.Limits[i], a.Limits[j] = a.Limits[j], a.Limits[i] }
 
-func (a ByBestAsk) Less(i, j int) bool {
-	return a.Limits[i].Price < a.Limits[j].Price
-}
+func (a ByBestAsk) Less(i, j int) bool { return a.Limits[i].Price < a.Limits[j].Price }
 
 type ByBestBid struct{ Limits }
 
-func (b ByBestBid) Len() int {
-	return len(b.Limits)
-}
+func (b ByBestBid) Len() int { return len(b.Limits) }
 
-func (b ByBestBid) Swap(i, j int) {
-	b.Limits[i], b.Limits[j] = b.Limits[j], b.Limits[i]
-}
+func (b ByBestBid) Swap(i, j int) { b.Limits[i], b.Limits[j] = b.Limits[j], b.Limits[i] }
 
-func (b ByBestBid) Less(i, j int) bool {
-	return b.Limits[i].Price > b.Limits[j].Price
-}
+func (b ByBestBid) Less(i, j int) bool { return b.Limits[i].Price > b.Limits[j].Price }
 
 func NewLimit(price float64) *Limit {
 	return &Limit{
@@ -187,6 +167,7 @@ type Orderbook struct {
 
 	AskLimits map[float64]*Limit
 	BidLimits map[float64]*Limit
+	Orders    map[int64]*Order
 }
 
 func NewOrderbook() *Orderbook {
@@ -195,6 +176,7 @@ func NewOrderbook() *Orderbook {
 		bids:      []*Limit{},
 		AskLimits: make(map[float64]*Limit),
 		BidLimits: make(map[float64]*Limit),
+		Orders:    make(map[int64]*Order),
 	}
 }
 
@@ -252,6 +234,7 @@ func (ob *Orderbook) PlaceLimitOrder(price float64, o *Order) {
 			ob.AskLimits[price] = limit
 		}
 	}
+	ob.Orders[o.ID] = o
 	limit.AddOrder(o)
 }
 
@@ -279,6 +262,7 @@ func (ob *Orderbook) clearLimit(bid bool, l *Limit) {
 func (ob *Orderbook) CancelOrder(o *Order) {
 	limit := o.Limit
 	limit.DeleteOrder(o)
+	delete(ob.Orders, o.ID)
 }
 
 func (ob *Orderbook) BidTotalVolume() float64 {

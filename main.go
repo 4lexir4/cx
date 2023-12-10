@@ -99,6 +99,7 @@ func (ex *Exchange) handleGetBook(c echo.Context) error {
 	for _, limit := range ob.Bids() {
 		for _, order := range limit.Orders {
 			o := Order{
+				ID:        order.ID,
 				Price:     limit.Price,
 				Size:      order.Size,
 				Bid:       order.Bid,
@@ -115,34 +116,10 @@ func (ex *Exchange) cancelOrder(c echo.Context) error {
 	idStr := c.Param("id")
 	id, _ := strconv.Atoi(idStr)
 	ob := ex.orderbooks[MarketETH]
-	orderCanceled := false
+	order := ob.Orders[int64(id)]
+	ob.CancelOrder(order)
 
-	for _, limit := range ob.Asks() {
-		for _, order := range limit.Orders {
-			if order.ID == int64(id) {
-				ob.CancelOrder(order)
-				orderCanceled = true
-			}
-
-			if orderCanceled {
-				return c.JSON(200, map[string]any{"msg": "order canceled"})
-			}
-		}
-	}
-
-	for _, limit := range ob.Bids() {
-		for _, order := range limit.Orders {
-			if order.ID == int64(id) {
-				ob.CancelOrder(order)
-				orderCanceled = true
-			}
-
-			if orderCanceled {
-				return c.JSON(200, map[string]any{"msg": "order canceled"})
-			}
-		}
-	}
-	return nil
+	return c.JSON(200, map[string]any{"msg": "order deleted"})
 }
 
 func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
