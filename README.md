@@ -13,7 +13,7 @@ Make account at:
 ## Echo
 ```// go get github.com/labstack/echo/{version}```
 
-```go get github.com/labstack/echo/v4```
+```$ go get github.com/labstack/echo/v4```
 
 
 ## Ganache
