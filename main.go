@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/4lexir4/cx/orderbook"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,6 +22,21 @@ func main() {
 	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
 	e.DELETE("/order/:id", ex.cancelOrder)
+
+	client, err := ethclient.Dial("http://localhost:8545")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := context.Background()
+	address := common.HexToAddress("0xCA291BD26B919601cede91D110e2C690f6222C89")
+	balance, err := client.BalanceAt(ctx, address, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(balance)
 
 	e.Start(":3000")
 }
