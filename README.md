@@ -17,4 +17,8 @@ Make account at:
 
 
 ## Ganache
+```$ npm install ganache --global```
+
+```https://github.com/trufflesuite/ganache#readme```
+
 ```https://trufflesuite.com/docs/ganache/quickstart/```
