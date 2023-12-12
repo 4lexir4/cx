@@ -144,6 +144,20 @@ func main() {
 	e.Start(":3000")
 }
 
+type User struct {
+	PrivateKey *ecdsa.PrivateKey
+}
+
+func NewUser(privateKey string) *User {
+	pk, err := crypto.HexToECDSA(privateKey)
+	if err != nil {
+		panic(err)
+	}
+	return &User{
+		PrivateKey: pk,
+	}
+}
+
 func httpErrorHandler(err error, c echo.Context) {
 	fmt.Println(err)
 }
