@@ -18,7 +18,52 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const exchangePrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
+const (
+	MarketOrder        OrderType = "MARKET"
+	LimitOrder         OrderType = "LIMIT"
+	exchangePrivateKey           = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
+	MarketETH          Market    = "ETH"
+)
+
+type (
+	OrderType string
+
+	Market string
+
+	Exchange struct {
+		PrivateKey *ecdsa.PrivateKey
+		orderbooks map[Market]*orderbook.Orderbook
+	}
+
+	PlaceOrderRequest struct {
+		Type   OrderType // limit or market
+		Bid    bool
+		Size   float64
+		Price  float64
+		Market Market
+	}
+
+	Order struct {
+		ID        int64
+		Price     float64
+		Size      float64
+		Bid       bool
+		Timestamp int64
+	}
+
+	OrderbookData struct {
+		TotalBidVolume float64
+		TotalAskVolume float64
+		Asks           []*Order
+		Bids           []*Order
+	}
+
+	MatchedOrder struct {
+		Price float64
+		Size  float64
+		ID    int64
+	}
+)
 
 func main() {
 	e := echo.New()
@@ -103,24 +148,6 @@ func httpErrorHandler(err error, c echo.Context) {
 	fmt.Println(err)
 }
 
-type OrderType string
-
-const (
-	MarketOrder OrderType = "MARKET"
-	LimitOrder  OrderType = "LIMIT"
-)
-
-type Market string
-
-const (
-	MarketETH Market = "ETH"
-)
-
-type Exchange struct {
-	PrivateKey *ecdsa.PrivateKey
-	orderbooks map[Market]*orderbook.Orderbook
-}
-
 func NewExchange(privateKey string) (*Exchange, error) {
 	orderbooks := make(map[Market]*orderbook.Orderbook)
 	orderbooks[MarketETH] = orderbook.NewOrderbook()
@@ -134,29 +161,6 @@ func NewExchange(privateKey string) (*Exchange, error) {
 		PrivateKey: pk,
 		orderbooks: orderbooks,
 	}, nil
-}
-
-type PlaceOrderRequest struct {
-	Type   OrderType // limit or market
-	Bid    bool
-	Size   float64
-	Price  float64
-	Market Market
-}
-
-type Order struct {
-	ID        int64
-	Price     float64
-	Size      float64
-	Bid       bool
-	Timestamp int64
-}
-
-type OrderbookData struct {
-	TotalBidVolume float64
-	TotalAskVolume float64
-	Asks           []*Order
-	Bids           []*Order
 }
 
 func (ex *Exchange) handleGetBook(c echo.Context) error {
@@ -210,12 +214,6 @@ func (ex *Exchange) cancelOrder(c echo.Context) error {
 	ob.CancelOrder(order)
 
 	return c.JSON(200, map[string]any{"msg": "order deleted"})
-}
-
-type MatchedOrder struct {
-	Price float64
-	Size  float64
-	ID    int64
 }
 
 func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
