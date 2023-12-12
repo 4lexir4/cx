@@ -18,10 +18,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const exchangePrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
+
 func main() {
 	e := echo.New()
 	e.HTTPErrorHandler = httpErrorHandler
-	ex := NewExchange()
+	ex, err := NewExchange(exchangePrivateKey)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
@@ -112,16 +117,23 @@ const (
 )
 
 type Exchange struct {
+	PrivateKey *ecdsa.PrivateKey
 	orderbooks map[Market]*orderbook.Orderbook
 }
 
-func NewExchange() *Exchange {
+func NewExchange(privateKey string) (*Exchange, error) {
 	orderbooks := make(map[Market]*orderbook.Orderbook)
 	orderbooks[MarketETH] = orderbook.NewOrderbook()
 
-	return &Exchange{
-		orderbooks: orderbooks,
+	pk, err := crypto.HexToECDSA(privateKey)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Exchange{
+		PrivateKey: pk,
+		orderbooks: orderbooks,
+	}, nil
 }
 
 type PlaceOrderRequest struct {
