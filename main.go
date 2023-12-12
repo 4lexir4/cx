@@ -230,6 +230,36 @@ func (ex *Exchange) cancelOrder(c echo.Context) error {
 	return c.JSON(200, map[string]any{"msg": "order deleted"})
 }
 
+func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order) ([]orderbook.Match, []*MatchedOrder) {
+	ob := ex.orderbooks[market]
+	matches := ob.PlaceMarketOrder(order)
+	matchedOrders := make([]*MatchedOrder, len(matches))
+
+	isBid := false
+	if order.Bid {
+		isBid = true
+	}
+
+	for i := 0; i < len(matchedOrders); i++ {
+		id := matches[i].Bid.ID
+		if isBid {
+			id = matches[i].Ask.ID
+		}
+		matchedOrders[i] = &MatchedOrder{
+			ID:    id,
+			Size:  matches[i].SizeFilled,
+			Price: matches[i].Price,
+		}
+	}
+	return matches, matchedOrders
+}
+
+func (ex *Exchange) handlePlaceLimitOrder(market Market, price float64, order *orderbook.Order) error {
+	ob := ex.orderbooks[market]
+	ob.PlaceLimitOrder(price, order)
+	return nil
+}
+
 func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
 	var placeOrderData PlaceOrderRequest
 
@@ -238,36 +268,26 @@ func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
 	}
 
 	market := Market(placeOrderData.Market)
-	ob := ex.orderbooks[market]
 	order := orderbook.NewOrder(placeOrderData.Bid, placeOrderData.Size)
 
 	if placeOrderData.Type == LimitOrder {
-		ob.PlaceLimitOrder(placeOrderData.Price, order)
+		if err := ex.handlePlaceLimitOrder(market, placeOrderData.Price, order); err != nil {
+			return err
+		}
 		return c.JSON(200, map[string]any{"msg": "limit order placed"})
 	}
 
 	if placeOrderData.Type == MarketOrder {
-		matches := ob.PlaceMarketOrder(order)
-		matchedOrders := make([]*MatchedOrder, len(matches))
-
-		isBid := false
-		if order.Bid {
-			isBid = true
-		}
-
-		for i := 0; i < len(matchedOrders); i++ {
-			id := matches[i].Bid.ID
-			if isBid {
-				id = matches[i].Ask.ID
-			}
-			matchedOrders[i] = &MatchedOrder{
-				ID:    id,
-				Size:  matches[i].SizeFilled,
-				Price: matches[i].Price,
-			}
+		matches, matchedOrders := ex.handlePlaceMarketOrder(market, order)
+		if err := ex.handleMatches(matches); err != nil {
+			return err
 		}
 		return c.JSON(200, map[string]any{"matches": matchedOrders})
 	}
 
+	return nil
+}
+
+func (ex *Exchange) handleMatches(matches []orderbook.Match) error {
 	return nil
 }
