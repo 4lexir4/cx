@@ -119,10 +119,6 @@ func main() {
 	tx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, nil)
 
 	chainID := big.NewInt(1337)
-	//chainID, err := client.NetworkID(context.Background()) // 1337
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
 
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
 	if err != nil {
