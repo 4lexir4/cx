@@ -31,11 +31,14 @@ type (
 	Market string
 
 	Exchange struct {
+		Users      map[int64]*User
+		orders     map[int64]int64
 		PrivateKey *ecdsa.PrivateKey
 		orderbooks map[Market]*orderbook.Orderbook
 	}
 
 	PlaceOrderRequest struct {
+		UserID int64
 		Type   OrderType // limit or market
 		Bid    bool
 		Size   float64
@@ -172,6 +175,8 @@ func NewExchange(privateKey string) (*Exchange, error) {
 	}
 
 	return &Exchange{
+		Users:      make(map[int64]*User),
+		orders:     make(map[int64]int64),
 		PrivateKey: pk,
 		orderbooks: orderbooks,
 	}, nil
@@ -257,6 +262,11 @@ func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order
 func (ex *Exchange) handlePlaceLimitOrder(market Market, price float64, order *orderbook.Order) error {
 	ob := ex.orderbooks[market]
 	ob.PlaceLimitOrder(price, order)
+
+	user := ex.Users[order.UserID]
+
+	// transfer from user to the exchange
+
 	return nil
 }
 
@@ -268,7 +278,7 @@ func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
 	}
 
 	market := Market(placeOrderData.Market)
-	order := orderbook.NewOrder(placeOrderData.Bid, placeOrderData.Size)
+	order := orderbook.NewOrder(placeOrderData.Bid, placeOrderData.Size, placeOrderData.UserID)
 
 	if placeOrderData.Type == LimitOrder {
 		if err := ex.handlePlaceLimitOrder(market, placeOrderData.Price, order); err != nil {
