@@ -2,6 +2,7 @@ package main
 
 import (
 	//"context"
+	"context"
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"github.com/4lexir4/cx/orderbook"
 	//"github.com/ethereum/go-ethereum/common"
 	//"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/labstack/echo/v4"
@@ -100,6 +102,10 @@ func main() {
 	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
 	e.DELETE("/order/:id", ex.cancelOrder)
+
+	address := "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"
+	balance, _ := ex.Client.BalanceAt(context.Background(), common.HexToAddress(address), nil)
+	fmt.Println(balance)
 
 	//ctx := context.Background()
 
