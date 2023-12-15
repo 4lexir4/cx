@@ -277,7 +277,10 @@ func (ex *Exchange) handlePlaceLimitOrder(market Market, price float64, order *o
 	ob := ex.orderbooks[market]
 	ob.PlaceLimitOrder(price, order)
 
-	user := ex.Users[order.UserID]
+	user, ok := ex.Users[order.UserID]
+	if !ok {
+		return fmt.Errorf("User not found: %d", user.ID)
+	}
 
 	exchangePubKey := ex.PrivateKey.Public()
 	publicKeyECDSA, ok := exchangePubKey.(*ecdsa.PublicKey)
