@@ -109,64 +109,21 @@ func main() {
 	user8 := NewUser(pkStr8, 8)
 	ex.Users[user8.ID] = user8
 
+	johnPk := "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52"
+	john := NewUser(johnPk, 666)
+	ex.Users[john.ID] = john
+
+	johnAddressStr := "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"
+	johnBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(johnAddressStr), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("John balance:", johnBalance)
+
+	fmt.Println("Seller balance:", sellerBalance)
 	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
 	e.DELETE("/order/:id", ex.cancelOrder)
-
-	//ctx := context.Background()
-
-	//privateKey, err := crypto.HexToECDSA("4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	//publicKey := privateKey.Public()
-	//publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	//if !ok {
-	//	log.Fatal("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
-	//}
-
-	//fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-
-	//nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	//value := big.NewInt(1000000000000000000) // in wei (1 eth)
-
-	//gasLimit := uint64(21000) // in units
-
-	//gasPrice, err := client.SuggestGasPrice(context.Background())
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	//toAddress := common.HexToAddress("0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e")
-
-	//tx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, nil)
-
-	//chainID := big.NewInt(1337)
-
-	//signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	//err = client.SendTransaction(context.Background(), signedTx)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	////fmt.Printf("%+v", tx)
-
-	//balance, err := client.BalanceAt(ctx, toAddress, nil)
-
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	//fmt.Println(balance)
 
 	e.Start(":3000")
 }
