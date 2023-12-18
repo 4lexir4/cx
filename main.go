@@ -51,6 +51,7 @@ type (
 	}
 
 	Order struct {
+		UserID    int64
 		ID        int64
 		Price     float64
 		Size      float64
@@ -86,18 +87,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pkStr := "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"
-	pk, err := crypto.HexToECDSA(pkStr)
-	if err != nil {
-		log.Fatal(err)
-	}
+	pkStr7 := "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"
+	user7 := NewUser(pkStr7, 7)
+	ex.Users[user7.ID] = user7
 
-	user := &User{
-		ID:         8,
-		PrivateKey: pk,
-	}
-
-	ex.Users[user.ID] = user
+	pkStr8 := "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"
+	user8 := NewUser(pkStr8, 8)
+	ex.Users[user8.ID] = user8
 
 	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
@@ -170,12 +166,13 @@ type User struct {
 	PrivateKey *ecdsa.PrivateKey
 }
 
-func NewUser(privateKey string) *User {
+func NewUser(privateKey string, id int64) *User {
 	pk, err := crypto.HexToECDSA(privateKey)
 	if err != nil {
 		panic(err)
 	}
 	return &User{
+		ID:         id,
 		PrivateKey: pk,
 	}
 }
@@ -219,6 +216,7 @@ func (ex *Exchange) handleGetBook(c echo.Context) error {
 	for _, limit := range ob.Asks() {
 		for _, order := range limit.Orders {
 			o := Order{
+				UserID:    order.UserID,
 				ID:        order.ID,
 				Price:     limit.Price,
 				Size:      order.Size,
@@ -232,6 +230,7 @@ func (ex *Exchange) handleGetBook(c echo.Context) error {
 	for _, limit := range ob.Bids() {
 		for _, order := range limit.Orders {
 			o := Order{
+				UserID:    order.UserID,
 				ID:        order.ID,
 				Price:     limit.Price,
 				Size:      order.Size,
