@@ -87,6 +87,20 @@ func main() {
 		log.Fatal(err)
 	}
 
+	buyerAddressStr := "0x28a8746e75304c0780E011BEd21C72cD78cd535E"
+	buyerBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(buyerAddressStr), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Buyer balance:", buyerBalance)
+
+	sellerAddressStr := "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"
+	sellerBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(sellerAddressStr), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Seller balance:", sellerBalance)
+
 	pkStr7 := "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"
 	user7 := NewUser(pkStr7, 7)
 	ex.Users[user7.ID] = user7
@@ -98,10 +112,6 @@ func main() {
 	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
 	e.DELETE("/order/:id", ex.cancelOrder)
-
-	address := "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"
-	balance, _ := ex.Client.BalanceAt(context.Background(), common.HexToAddress(address), nil)
-	fmt.Println(balance)
 
 	//ctx := context.Background()
 
