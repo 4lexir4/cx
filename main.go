@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/4lexir4/cx/client"
@@ -22,9 +23,12 @@ func main() {
 	}
 	go func() {
 		for {
-			if err := c.PlaceLimitOrder(bidParams); err != nil {
+			resp, err := c.PlaceLimitOrder(bidParams)
+			if err != nil {
 				panic(err)
 			}
+
+			fmt.Println("Order ID =>", resp.OrderID)
 
 			time.Sleep(1 * time.Second)
 		}
@@ -37,9 +41,12 @@ func main() {
 	}
 
 	for {
-		if err := c.PlaceLimitOrder(askParams); err != nil {
+		resp, err := c.PlaceLimitOrder(askParams)
+		if err != nil {
 			panic(err)
 		}
+
+		fmt.Println("Order ID =>", resp.OrderID)
 
 		time.Sleep(1 * time.Second)
 	}

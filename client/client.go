@@ -21,6 +21,10 @@ func NewClient() *Client {
 	}
 }
 
+func (c *Client) CancelOrder() error {
+	return nil
+}
+
 type PlaceLimitOrderParams struct {
 	UserID int64
 	Bid    bool
@@ -28,7 +32,7 @@ type PlaceLimitOrderParams struct {
 	Size   float64
 }
 
-func (c *Client) PlaceLimitOrder(p *PlaceLimitOrderParams) error {
+func (c *Client) PlaceLimitOrder(p *PlaceLimitOrderParams) (*server.PlaceOrderResponse, error) {
 	params := &server.PlaceOrderRequest{
 		UserID: p.UserID,
 		Type:   server.LimitOrder,
@@ -40,23 +44,24 @@ func (c *Client) PlaceLimitOrder(p *PlaceLimitOrderParams) error {
 
 	body, err := json.Marshal(params)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	e := Endpoint + "/order"
 	req, err := http.NewRequest(http.MethodPost, e, bytes.NewReader(body))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_ = resp
+	placeOrderResponse := &server.PlaceOrderResponse{}
+	if err := json.NewDecoder(resp.Body).Decode(placeOrderResponse); err != nil {
+		return nil, err
+	}
 
-	//fmt.Printf("%+v", resp)
-
-	return nil
+	return placeOrderResponse, nil
 }

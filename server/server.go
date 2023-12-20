@@ -252,6 +252,10 @@ func (ex *Exchange) handlePlaceLimitOrder(market Market, price float64, order *o
 	return nil
 }
 
+type PlaceOrderResponse struct {
+	OrderID int64
+}
+
 func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
 	var placeOrderData PlaceOrderRequest
 
@@ -266,7 +270,11 @@ func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
 		if err := ex.handlePlaceLimitOrder(market, placeOrderData.Price, order); err != nil {
 			return err
 		}
-		return c.JSON(200, map[string]any{"msg": "limit order placed"})
+
+		resp := &PlaceOrderResponse{
+			OrderID: order.ID,
+		}
+		return c.JSON(200, resp) //map[string]any{"orderID": order.ID})
 	}
 
 	if placeOrderData.Type == MarketOrder {
