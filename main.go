@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"time"
 
 	"github.com/4lexir4/cx/client"
@@ -22,22 +22,22 @@ func main() {
 			Price:  10_000,
 			Size:   1_000_000,
 		}
-		resp, err := c.PlaceLimitOrder(limitOrderParams)
+		_, err := c.PlaceLimitOrder(limitOrderParams)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("Placed limit order from the client =>", resp.OrderID)
+		//fmt.Println("Placed limit order from the client =>", resp.OrderID)
 
 		marketOrderParams := &client.PlaceOrderParams{
 			UserID: 7,
 			Bid:    true,
 			Size:   1_000_000,
 		}
-		resp, err = c.PlaceMarketOrder(marketOrderParams)
+		_, err = c.PlaceMarketOrder(marketOrderParams)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("Placed market order from the client =>", resp.OrderID)
+		//fmt.Println("Placed market order from the client =>", resp.OrderID)
 
 		time.Sleep(1 * time.Second)
 	}

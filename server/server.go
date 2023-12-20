@@ -7,13 +7,14 @@ import (
 	"math/big"
 
 	"encoding/json"
+	"log"
+	"net/http"
+	"strconv"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"log"
-	"net/http"
-	"strconv"
 
 	"github.com/4lexir4/cx/orderbook"
 	"github.com/labstack/echo/v4"
@@ -231,6 +232,7 @@ func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order
 		isBid = true
 	}
 
+	totalSizeFilled := 0.0
 	for i := 0; i < len(matchedOrders); i++ {
 		id := matches[i].Bid.ID
 		if isBid {
@@ -241,7 +243,9 @@ func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order
 			Size:  matches[i].SizeFilled,
 			Price: matches[i].Price,
 		}
+		totalSizeFilled += matches[i].SizeFilled
 	}
+	log.Printf("Filled market order => ID: [%d] | size: [%.2f]", order.ID, totalSizeFilled)
 	return matches, matchedOrders
 }
 
@@ -272,22 +276,19 @@ func (ex *Exchange) handlePlaceOrder(c echo.Context) error {
 		if err := ex.handlePlaceLimitOrder(market, placeOrderData.Price, order); err != nil {
 			return err
 		}
-
-		resp := &PlaceOrderResponse{
-			OrderID: order.ID,
-		}
-		return c.JSON(200, resp) //map[string]any{"orderID": order.ID})
 	}
 
 	if placeOrderData.Type == MarketOrder {
-		matches, matchedOrders := ex.handlePlaceMarketOrder(market, order)
+		matches, _ := ex.handlePlaceMarketOrder(market, order)
 		if err := ex.handleMatches(matches); err != nil {
 			return err
 		}
-		return c.JSON(200, map[string]any{"matches": matchedOrders})
 	}
 
-	return nil
+	resp := &PlaceOrderResponse{
+		OrderID: order.ID,
+	}
+	return c.JSON(200, resp)
 }
 
 func (ex *Exchange) handleMatches(matches []orderbook.Match) error {
