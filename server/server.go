@@ -216,6 +216,8 @@ func (ex *Exchange) cancelOrder(c echo.Context) error {
 	order := ob.Orders[int64(id)]
 	ob.CancelOrder(order)
 
+	log.Println("Order canceled, ID =>", id)
+
 	return c.JSON(200, map[string]any{"msg": "order deleted"})
 }
 

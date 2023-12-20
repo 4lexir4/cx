@@ -3,6 +3,8 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+
 	//"fmt"
 	"net/http"
 
@@ -21,7 +23,16 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) CancelOrder() error {
+func (c *Client) CancelOrder(orderID int64) error {
+	e := fmt.Sprintf("%s/order/%d", Endpoint, orderID)
+	req, err := http.NewRequest(http.MethodDelete, e, nil)
+	if err != nil {
+		return err
+	}
+	_, err = c.Do(req)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -30,6 +30,10 @@ func main() {
 
 			fmt.Println("Order ID =>", resp.OrderID)
 
+			if err := c.CancelOrder(resp.OrderID); err != nil {
+				panic(err)
+			}
+
 			time.Sleep(1 * time.Second)
 		}
 	}()
