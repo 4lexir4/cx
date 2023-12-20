@@ -14,14 +14,34 @@ func main() {
 
 	c := client.NewClient()
 
-	params := &client.PlaceLimitOrderParams{
+	bidParams := &client.PlaceLimitOrderParams{
 		UserID: 8,
 		Bid:    true,
-		Price:  4000.0,
-		Size:   4000.0,
+		Price:  10_000,
+		Size:   1000,
+	}
+	go func() {
+		for {
+			if err := c.PlaceLimitOrder(bidParams); err != nil {
+				panic(err)
+			}
+
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	askParams := &client.PlaceLimitOrderParams{
+		UserID: 8,
+		Bid:    false,
+		Price:  8_000,
+		Size:   1000,
 	}
 
-	if err := c.PlaceLimitOrder(params); err != nil {
-		panic(err)
+	for {
+		if err := c.PlaceLimitOrder(askParams); err != nil {
+			panic(err)
+		}
+
+		time.Sleep(1 * time.Second)
 	}
+	select {}
 }

@@ -247,6 +247,8 @@ func (ex *Exchange) handlePlaceLimitOrder(market Market, price float64, order *o
 	ob := ex.orderbooks[market]
 	ob.PlaceLimitOrder(price, order)
 
+	log.Printf("New LIMIT order => type: [%t] | price: [%.2f] | size: [%.2f]", order.Bid, order.Limit.Price, order.Size)
+
 	return nil
 }
 

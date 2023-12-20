@@ -3,7 +3,7 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	//"fmt"
 	"net/http"
 
 	"github.com/4lexir4/cx/server"
@@ -54,7 +54,9 @@ func (c *Client) PlaceLimitOrder(p *PlaceLimitOrderParams) error {
 		return err
 	}
 
-	fmt.Printf("%+v", resp)
+	_ = resp
+
+	//fmt.Printf("%+v", resp)
 
 	return nil
 }
