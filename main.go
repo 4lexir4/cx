@@ -20,9 +20,20 @@ func main() {
 			UserID: 8,
 			Bid:    false,
 			Price:  10_000,
-			Size:   1_000_000,
+			Size:   500_000,
 		}
 		_, err := c.PlaceLimitOrder(limitOrderParams)
+		if err != nil {
+			panic(err)
+		}
+
+		otherLimitOrderParams := &client.PlaceOrderParams{
+			UserID: 666,
+			Bid:    false,
+			Price:  9_000,
+			Size:   500_000,
+		}
+		_, err = c.PlaceLimitOrder(otherLimitOrderParams)
 		if err != nil {
 			panic(err)
 		}
