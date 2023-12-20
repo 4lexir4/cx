@@ -233,6 +233,7 @@ func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order
 	}
 
 	totalSizeFilled := 0.0
+	sumPrice := 0.0
 	for i := 0; i < len(matchedOrders); i++ {
 		id := matches[i].Bid.ID
 		if isBid {
@@ -244,8 +245,10 @@ func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order
 			Price: matches[i].Price,
 		}
 		totalSizeFilled += matches[i].SizeFilled
+		sumPrice += matches[i].Price
 	}
-	log.Printf("Filled market order => ID: [%d] | size: [%.2f]", order.ID, totalSizeFilled)
+	avgPrice := sumPrice / float64(len(matches))
+	log.Printf("Filled market order => ID: [%d] | size: [%.2f] | avgPrice: [%.2f]", order.ID, totalSizeFilled, avgPrice)
 	return matches, matchedOrders
 }
 
