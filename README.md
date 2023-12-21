@@ -1,6 +1,8 @@
 # cx
 Crypto Exchange (from scratch)
 
+**NOTE**: The project is in active development.
+
 # Install:
 
 ## Postman
