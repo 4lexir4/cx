@@ -1,7 +1,5 @@
-# cx
+# cx **NOTE**: The project is in active development.
 Crypto Exchange (from scratch)
-
-**NOTE**: The project is in active development.
 
 # Install:
 
