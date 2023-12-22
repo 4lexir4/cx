@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"time"
 
 	"github.com/4lexir4/cx/client"
@@ -59,7 +59,18 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		//fmt.Println("Placed market order from the client =>", resp.OrderID)
+
+		bestBidPrice, err := c.GetBestBid()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Best bid price: [%.2f]\n", bestBidPrice)
+
+		bestAskPrice, err := c.GetBestAsk()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Best ask price: [%.2f]\n", bestAskPrice)
 
 		time.Sleep(1 * time.Second)
 	}

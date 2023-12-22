@@ -119,12 +119,13 @@ func StartServer() {
 	}
 	fmt.Println("John balance:", johnBalance)
 
-	fmt.Println("Seller balance:", sellerBalance)
-	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
-	e.DELETE("/order/:id", ex.cancelOrder)
+
+	e.GET("/book/:market", ex.handleGetBook)
 	e.GET("/book/:market/bid", ex.handleGetBestBid)
 	e.GET("/book/:market/ask", ex.handleGetBestAsk)
+
+	e.DELETE("/order/:id", ex.cancelOrder)
 
 	e.Start(":3000")
 }
