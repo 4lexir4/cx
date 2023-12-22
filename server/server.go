@@ -123,6 +123,8 @@ func StartServer() {
 	e.GET("/book/:market", ex.handleGetBook)
 	e.POST("/order", ex.handlePlaceOrder)
 	e.DELETE("/order/:id", ex.cancelOrder)
+	e.GET("/book/:market/bid", ex.handleGetBestBid)
+	e.GET("/book/:market/ask", ex.handleGetBestAsk)
 
 	e.Start(":3000")
 }
@@ -208,6 +210,42 @@ func (ex *Exchange) handleGetBook(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, orderbookData)
+}
+
+type PriceResponse struct {
+	Price float64
+}
+
+func (ex *Exchange) handleGetBestBid(c echo.Context) error {
+	market := Market(c.Param("market"))
+	ob := ex.orderbooks[market]
+
+	if len(ob.Bids()) == 0 {
+		return fmt.Errorf("Bids are empty")
+	}
+
+	bestBidPrice := ob.Bids()[0].Price
+	pr := PriceResponse{
+		Price: bestBidPrice,
+	}
+
+	return c.JSON(http.StatusOK, pr)
+}
+
+func (ex *Exchange) handleGetBestAsk(c echo.Context) error {
+	market := Market(c.Param("market"))
+	ob := ex.orderbooks[market]
+
+	if len(ob.Asks()) == 0 {
+		return fmt.Errorf("Asks are empty")
+	}
+
+	bestAskPrice := ob.Asks()[0].Price
+	pr := PriceResponse{
+		Price: bestAskPrice,
+	}
+
+	return c.JSON(http.StatusOK, pr)
 }
 
 func (ex *Exchange) cancelOrder(c echo.Context) error {
