@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/4lexir4/cx/client"
@@ -14,7 +15,18 @@ func makeMarketSimple(client *client.Client) {
 	ticker := time.NewTicker(tick)
 	for {
 		<-ticker.C
-		fmt.Println("test")
+
+		bestAsk, err := client.GetBestAsk()
+		if err != nil {
+			log.Println(err)
+		}
+		bestBid, err := client.GetBestBid()
+		if err != nil {
+			log.Println(err)
+		}
+
+		fmt.Println("Best ask price", bestAsk)
+		fmt.Println("Best bid price", bestBid)
 	}
 
 }

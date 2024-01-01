@@ -1,8 +1,8 @@
 build:
-	go build -o ./bin/cx
+	@go build -o bin/cx
 
 run:
-	./bin/cx
+	@./bin/cx
 
 test:
-	go test -v ./...
+	@go test -v ./...
