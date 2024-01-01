@@ -1,14 +1,21 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"time"
 
 	"github.com/4lexir4/cx/client"
 	"github.com/4lexir4/cx/server"
 )
 
+var tick = 1 * time.Second
+
 func makeMarketSimple(client *client.Client) {
+	ticker := time.NewTicker(tick)
+	for {
+		<-ticker.C
+		fmt.Println("test")
+	}
 
 }
 
@@ -47,6 +54,8 @@ func main() {
 	if err := seedMarket(c); err != nil {
 		panic(err)
 	}
+
+	makeMarketSimple(c)
 
 	//for {
 	//	limitOrderParams := &client.PlaceOrderParams{
