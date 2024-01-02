@@ -5,6 +5,8 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
+	"sync"
+
 	//"os/user"
 
 	"encoding/json"
@@ -35,6 +37,7 @@ type (
 
 	Exchange struct {
 		Client *ethclient.Client
+		mu     sync.RWMutex
 		Users  map[int64]*User
 		// Orders maps a user to its orders
 		Orders     map[int64][]*orderbook.Order
@@ -68,9 +71,10 @@ type (
 	}
 
 	MatchedOrder struct {
-		Price float64
-		Size  float64
-		ID    int64
+		UserID int64
+		Price  float64
+		Size   float64
+		ID     int64
 	}
 )
 
@@ -178,7 +182,9 @@ func (ex *Exchange) handleGetOrders(c echo.Context) error {
 		return err
 	}
 
+	ex.mu.RLock()
 	orderbookOrders := ex.Orders[int64(userID)]
+
 	orders := make([]Order, len(orderbookOrders))
 
 	for i := 0; i < len(orderbookOrders); i++ {
@@ -193,6 +199,7 @@ func (ex *Exchange) handleGetOrders(c echo.Context) error {
 		orders[i] = order
 	}
 
+	ex.mu.RUnlock()
 	return c.JSON(http.StatusOK, orders)
 }
 
@@ -302,20 +309,42 @@ func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order
 	totalSizeFilled := 0.0
 	sumPrice := 0.0
 	for i := 0; i < len(matchedOrders); i++ {
+
+		var limitUserID int64
+
 		id := matches[i].Bid.ID
+		limitUserID = matches[i].Bid.UserID
 		if isBid {
+			limitUserID = matches[i].Ask.UserID
 			id = matches[i].Ask.ID
 		}
 		matchedOrders[i] = &MatchedOrder{
-			ID:    id,
-			Size:  matches[i].SizeFilled,
-			Price: matches[i].Price,
+			UserID: limitUserID,
+			ID:     id,
+			Size:   matches[i].SizeFilled,
+			Price:  matches[i].Price,
 		}
 		totalSizeFilled += matches[i].SizeFilled
 		sumPrice += matches[i].Price
 	}
 	avgPrice := sumPrice / float64(len(matches))
 	log.Printf("Filled market order => ID: [%d] | size: [%.2f] | avgPrice: [%.2f]", order.ID, totalSizeFilled, avgPrice)
+
+	newOrderMap := make(map[int64][]*orderbook.Order)
+	ex.mu.Lock()
+	for userID, orderbookOrders := range ex.Orders {
+		for i := 0; i < len(orderbookOrders); i++ {
+			// if the order is not filled we placed it in the copy.
+			// this means that the size of the order is zero
+			if !orderbookOrders[i].IsFilled() {
+				newOrderMap[userID] = append(newOrderMap[userID], orderbookOrders[i])
+			}
+		}
+	}
+
+	ex.Orders = newOrderMap
+	ex.mu.Unlock()
+
 	return matches, matchedOrders
 }
 
@@ -323,7 +352,10 @@ func (ex *Exchange) handlePlaceLimitOrder(market Market, price float64, order *o
 	ob := ex.orderbooks[market]
 	ob.PlaceLimitOrder(price, order)
 
+	// keep track of the user orders
+	ex.mu.Lock()
 	ex.Orders[order.UserID] = append(ex.Orders[order.UserID], order)
+	ex.mu.Unlock()
 
 	log.Printf("New LIMIT order => type: [%t] | price: [%.2f] | size: [%.2f]", order.Bid, order.Limit.Price, order.Size)
 
@@ -385,7 +417,6 @@ func (ex *Exchange) handleMatches(matches []orderbook.Match) error {
 		//}
 
 		amount := big.NewInt(int64(match.SizeFilled))
-
 		transferETF(ex.Client, fromUser.PrivateKey, toAddress, amount)
 	}
 	return nil
