@@ -2,7 +2,7 @@ build:
 	@go build -o bin/cx
 
 run:
-	@./bin/cx
+	@go build -o bin/cx; ./bin/cx
 
 test:
 	@go test -v ./...

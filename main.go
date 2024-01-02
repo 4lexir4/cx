@@ -3,26 +3,55 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"github.com/4lexir4/cx/client"
 	"github.com/4lexir4/cx/server"
 )
 
-var tick = 1 * time.Second
+var tick = 2 * time.Second
 
-func makeMarketSimple(client *client.Client) {
+func makeMarketSimple(c *client.Client) {
 	ticker := time.NewTicker(tick)
+
 	for {
 		<-ticker.C
 
-		bestAsk, err := client.GetBestAsk()
+		bestAsk, err := c.GetBestAsk()
 		if err != nil {
 			log.Println(err)
 		}
-		bestBid, err := client.GetBestBid()
+		bestBid, err := c.GetBestBid()
 		if err != nil {
 			log.Println(err)
+		}
+
+		spread := math.Abs(bestBid - bestAsk)
+		fmt.Println("Spread", spread)
+
+		bidLimit := &client.PlaceOrderParams{
+			UserID: 7,
+			Bid:    true,
+			Price:  bestBid + 100,
+			Size:   1_000,
+		}
+
+		bidOrderID, err := c.PlaceLimitOrder(bidLimit)
+		if err != nil {
+			log.Println(bidOrderID)
+		}
+
+		askLimit := &client.PlaceOrderParams{
+			UserID: 7,
+			Bid:    false,
+			Price:  bestAsk - 100,
+			Size:   1_000,
+		}
+
+		askOrderID, err := c.PlaceLimitOrder(askLimit)
+		if err != nil {
+			log.Println(askOrderID)
 		}
 
 		fmt.Println("Best ask price", bestAsk)
