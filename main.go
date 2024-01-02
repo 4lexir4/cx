@@ -10,7 +10,11 @@ import (
 	"github.com/4lexir4/cx/server"
 )
 
-var tick = 2 * time.Second
+var (
+	tick   = 2 * time.Second
+	myAsks = make(map[float64]int64)
+	myBids = make(map[float64]int64)
+)
 
 func makeMarketSimple(c *client.Client) {
 	ticker := time.NewTicker(tick)
@@ -37,10 +41,12 @@ func makeMarketSimple(c *client.Client) {
 			Size:   1_000,
 		}
 
-		bidOrderID, err := c.PlaceLimitOrder(bidLimit)
+		bidOrderResp, err := c.PlaceLimitOrder(bidLimit)
 		if err != nil {
-			log.Println(bidOrderID)
+			log.Println(bidOrderResp.OrderID)
 		}
+
+		myBids[bidLimit.Price] = bidOrderResp.OrderID
 
 		askLimit := &client.PlaceOrderParams{
 			UserID: 7,
@@ -49,10 +55,12 @@ func makeMarketSimple(c *client.Client) {
 			Size:   1_000,
 		}
 
-		askOrderID, err := c.PlaceLimitOrder(askLimit)
+		askOrderResp, err := c.PlaceLimitOrder(askLimit)
 		if err != nil {
-			log.Println(askOrderID)
+			log.Println(askOrderResp.OrderID)
 		}
+
+		myAsks[askLimit.Price] = askOrderResp.OrderID
 
 		fmt.Println("Best ask price", bestAsk)
 		fmt.Println("Best bid price", bestBid)
