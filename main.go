@@ -10,6 +10,10 @@ import (
 	"github.com/4lexir4/cx/server"
 )
 
+const (
+	maxOrders = 3
+)
+
 var (
 	tick   = 2 * time.Second
 	myAsks = make(map[float64]int64)
@@ -20,8 +24,6 @@ func makeMarketSimple(c *client.Client) {
 	ticker := time.NewTicker(tick)
 
 	for {
-		<-ticker.C
-
 		bestAsk, err := c.GetBestAsk()
 		if err != nil {
 			log.Println(err)
@@ -34,36 +36,44 @@ func makeMarketSimple(c *client.Client) {
 		spread := math.Abs(bestBid - bestAsk)
 		fmt.Println("Spread", spread)
 
-		bidLimit := &client.PlaceOrderParams{
-			UserID: 7,
-			Bid:    true,
-			Price:  bestBid + 100,
-			Size:   1_000,
+		if len(myBids) < 3 {
+			// place the bid order
+			bidLimit := &client.PlaceOrderParams{
+				UserID: 7,
+				Bid:    true,
+				Price:  bestBid + 100,
+				Size:   1_000,
+			}
+
+			bidOrderResp, err := c.PlaceLimitOrder(bidLimit)
+			if err != nil {
+				log.Println(bidOrderResp.OrderID)
+			}
+
+			myBids[bidLimit.Price] = bidOrderResp.OrderID
 		}
 
-		bidOrderResp, err := c.PlaceLimitOrder(bidLimit)
-		if err != nil {
-			log.Println(bidOrderResp.OrderID)
+		if len(myAsks) < 3 {
+			// place the ask order
+			askLimit := &client.PlaceOrderParams{
+				UserID: 7,
+				Bid:    false,
+				Price:  bestAsk - 100,
+				Size:   1_000,
+			}
+
+			askOrderResp, err := c.PlaceLimitOrder(askLimit)
+			if err != nil {
+				log.Println(askOrderResp.OrderID)
+			}
+
+			myAsks[askLimit.Price] = askOrderResp.OrderID
 		}
-
-		myBids[bidLimit.Price] = bidOrderResp.OrderID
-
-		askLimit := &client.PlaceOrderParams{
-			UserID: 7,
-			Bid:    false,
-			Price:  bestAsk - 100,
-			Size:   1_000,
-		}
-
-		askOrderResp, err := c.PlaceLimitOrder(askLimit)
-		if err != nil {
-			log.Println(askOrderResp.OrderID)
-		}
-
-		myAsks[askLimit.Price] = askOrderResp.OrderID
 
 		fmt.Println("Best ask price", bestAsk)
 		fmt.Println("Best bid price", bestBid)
+
+		<-ticker.C
 	}
 
 }
