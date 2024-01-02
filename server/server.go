@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
+	//"os/user"
 
 	"encoding/json"
 	"log"
@@ -33,9 +34,10 @@ type (
 	Market string
 
 	Exchange struct {
-		Client     *ethclient.Client
-		Users      map[int64]*User
-		orders     map[int64]int64
+		Client *ethclient.Client
+		Users  map[int64]*User
+		// Orders maps a user to its orders
+		Orders     map[int64][]*orderbook.Order
 		PrivateKey *ecdsa.PrivateKey
 		orderbooks map[Market]*orderbook.Orderbook
 	}
@@ -121,6 +123,7 @@ func StartServer() {
 
 	e.POST("/order", ex.handlePlaceOrder)
 
+	e.GET("/order/:userID", ex.handleGetOrders)
 	e.GET("/book/:market", ex.handleGetBook)
 	e.GET("/book/:market/bid", ex.handleGetBestBid)
 	e.GET("/book/:market/ask", ex.handleGetBestAsk)
@@ -162,10 +165,35 @@ func NewExchange(privateKey string, client *ethclient.Client) (*Exchange, error)
 	return &Exchange{
 		Client:     client,
 		Users:      make(map[int64]*User),
-		orders:     make(map[int64]int64),
+		Orders:     make(map[int64][]*orderbook.Order),
 		PrivateKey: pk,
 		orderbooks: orderbooks,
 	}, nil
+}
+
+func (ex *Exchange) handleGetOrders(c echo.Context) error {
+	userIDStr := c.Param("userID")
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return err
+	}
+
+	orderbookOrders := ex.Orders[int64(userID)]
+	orders := make([]Order, len(orderbookOrders))
+
+	for i := 0; i < len(orderbookOrders); i++ {
+		order := Order{
+			ID:        orderbookOrders[i].ID,
+			UserID:    orderbookOrders[i].UserID,
+			Price:     orderbookOrders[i].Limit.Price,
+			Size:      orderbookOrders[i].Size,
+			Bid:       orderbookOrders[i].Bid,
+			Timestamp: orderbookOrders[i].Timestamp,
+		}
+		orders[i] = order
+	}
+
+	return c.JSON(http.StatusOK, orders)
 }
 
 func (ex *Exchange) handleGetBook(c echo.Context) error {
@@ -294,6 +322,8 @@ func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order
 func (ex *Exchange) handlePlaceLimitOrder(market Market, price float64, order *orderbook.Order) error {
 	ob := ex.orderbooks[market]
 	ob.PlaceLimitOrder(price, order)
+
+	ex.Orders[order.UserID] = append(ex.Orders[order.UserID], order)
 
 	log.Printf("New LIMIT order => type: [%t] | price: [%.2f] | size: [%.2f]", order.Bid, order.Limit.Price, order.Size)
 
