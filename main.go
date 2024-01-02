@@ -20,6 +20,35 @@ var (
 	myBids = make(map[float64]int64)
 )
 
+func marketOrderPlacer(c *client.Client) {
+	ticker := time.NewTicker(5 * time.Second)
+	for {
+		marketSellOrder := &client.PlaceOrderParams{
+			UserID: 666,
+			Bid:    false,
+			Size:   1_000,
+		}
+
+		orderResp, err := c.PlaceMarketOrder(marketSellOrder)
+		if err != nil {
+			log.Println(orderResp.OrderID)
+		}
+
+		marketBuyOrder := &client.PlaceOrderParams{
+			UserID: 666,
+			Bid:    true,
+			Size:   1_000,
+		}
+
+		orderResp, err = c.PlaceMarketOrder(marketBuyOrder)
+		if err != nil {
+			log.Println(orderResp.OrderID)
+		}
+
+		<-ticker.C
+	}
+}
+
 func makeMarketSimple(c *client.Client) {
 	ticker := time.NewTicker(tick)
 
@@ -114,7 +143,9 @@ func main() {
 		panic(err)
 	}
 
-	makeMarketSimple(c)
+	go makeMarketSimple(c)
+	time.Sleep(1 * time.Second)
+	marketOrderPlacer(c)
 
 	//for {
 	//	limitOrderParams := &client.PlaceOrderParams{
