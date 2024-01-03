@@ -22,13 +22,24 @@ var (
 func marketOrderPlacer(c *client.Client) {
 	ticker := time.NewTicker(5 * time.Second)
 	for {
+		otherMarketSellOrder := &client.PlaceOrderParams{
+			UserID: 8,
+			Bid:    false,
+			Size:   5_000,
+		}
+
+		orderResp, err := c.PlaceMarketOrder(otherMarketSellOrder)
+		if err != nil {
+			log.Println(orderResp.OrderID)
+		}
+
 		marketSellOrder := &client.PlaceOrderParams{
 			UserID: 666,
 			Bid:    false,
-			Size:   1_000,
+			Size:   3_000,
 		}
 
-		orderResp, err := c.PlaceMarketOrder(marketSellOrder)
+		orderResp, err = c.PlaceMarketOrder(marketSellOrder)
 		if err != nil {
 			log.Println(orderResp.OrderID)
 		}
@@ -112,7 +123,7 @@ func seedMarket(c *client.Client) error {
 		UserID: 8,
 		Bid:    false,
 		Price:  10_000,
-		Size:   1_000_000,
+		Size:   10_000,
 	}
 	_, err := c.PlaceLimitOrder(ask)
 	if err != nil {
@@ -123,7 +134,7 @@ func seedMarket(c *client.Client) error {
 		UserID: 8,
 		Bid:    true,
 		Price:  9_000,
-		Size:   1_000_000,
+		Size:   10_000,
 	}
 	_, err = c.PlaceLimitOrder(bid)
 	if err != nil {
