@@ -25,3 +25,7 @@ Make account at:
 
 ## Go-Ethereum
 ```$ go get github.com/ethereum/go-ethereum```
+
+## Logrus
+```$ go get github.com/sirupsen/logrus```
+
