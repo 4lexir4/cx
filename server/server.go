@@ -175,6 +175,11 @@ func NewExchange(privateKey string, client *ethclient.Client) (*Exchange, error)
 	}, nil
 }
 
+type GetOrdersResponse struct {
+	Asks []Order
+	Bids []Order
+}
+
 func (ex *Exchange) handleGetOrders(c echo.Context) error {
 	userIDStr := c.Param("userID")
 	userID, err := strconv.Atoi(userIDStr)
@@ -184,10 +189,18 @@ func (ex *Exchange) handleGetOrders(c echo.Context) error {
 
 	ex.mu.RLock()
 	orderbookOrders := ex.Orders[int64(userID)]
-
-	orders := make([]Order, len(orderbookOrders))
+	ordersResp := &GetOrdersResponse{
+		Asks: []Order{},
+		Bids: []Order{},
+	}
 
 	for i := 0; i < len(orderbookOrders); i++ {
+		// it could be that the order is getting filled
+		// even though it is incluced in this response.
+		// We must double check if the limit is not nil
+		if orderbookOrders[i].Limit == nil {
+			continue
+		}
 		order := Order{
 			ID:        orderbookOrders[i].ID,
 			UserID:    orderbookOrders[i].UserID,
@@ -196,11 +209,16 @@ func (ex *Exchange) handleGetOrders(c echo.Context) error {
 			Bid:       orderbookOrders[i].Bid,
 			Timestamp: orderbookOrders[i].Timestamp,
 		}
-		orders[i] = order
+
+		if order.Bid {
+			ordersResp.Bids = append(ordersResp.Bids, order)
+		} else {
+			ordersResp.Asks = append(ordersResp.Asks, order)
+		}
 	}
 
 	ex.mu.RUnlock()
-	return c.JSON(http.StatusOK, orders)
+	return c.JSON(http.StatusOK, ordersResp)
 }
 
 func (ex *Exchange) handleGetBook(c echo.Context) error {

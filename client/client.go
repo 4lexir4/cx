@@ -23,7 +23,7 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) GetOrders(userID int64) ([]server.Order, error) {
+func (c *Client) GetOrders(userID int64) (*server.GetOrdersResponse, error) {
 	e := fmt.Sprintf("%s/order/%d", Endpoint, userID)
 	req, err := http.NewRequest(http.MethodGet, e, nil)
 	if err != nil {
@@ -35,13 +35,12 @@ func (c *Client) GetOrders(userID int64) ([]server.Order, error) {
 		return nil, err
 	}
 
-	orders := []server.Order{}
+	orders := server.GetOrdersResponse{}
 	if err := json.NewDecoder(resp.Body).Decode(&orders); err != nil {
 		return nil, err
 	}
 
-	//return orders, nil
-	return nil, nil
+	return &orders, nil
 }
 
 func (c *Client) PlaceMarketOrder(p *PlaceOrderParams) (*server.PlaceOrderResponse, error) {
