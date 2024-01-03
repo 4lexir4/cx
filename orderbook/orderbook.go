@@ -175,7 +175,7 @@ type Orderbook struct {
 	asks []*Limit
 	bids []*Limit
 
-	trade []*Trade
+	Trade []*Trade
 
 	mu        sync.RWMutex
 	AskLimits map[float64]*Limit
@@ -187,7 +187,7 @@ func NewOrderbook() *Orderbook {
 	return &Orderbook{
 		asks:      []*Limit{},
 		bids:      []*Limit{},
-		trade:     []*Trade{},
+		Trade:     []*Trade{},
 		AskLimits: make(map[float64]*Limit),
 		BidLimits: make(map[float64]*Limit),
 		Orders:    make(map[int64]*Order),
@@ -232,7 +232,7 @@ func (ob *Orderbook) PlaceMarketOrder(o *Order) []Match {
 			Timestamp: time.Now().UnixNano(),
 			Bid:       o.Bid,
 		}
-		ob.trade = append(ob.trade, trade)
+		ob.Trade = append(ob.Trade, trade)
 	}
 
 	return matches

@@ -25,7 +25,7 @@ func marketOrderPlacer(c *client.Client) {
 		otherMarketSellOrder := &client.PlaceOrderParams{
 			UserID: 8,
 			Bid:    false,
-			Size:   5_000,
+			Size:   100,
 		}
 
 		orderResp, err := c.PlaceMarketOrder(otherMarketSellOrder)
@@ -36,7 +36,7 @@ func marketOrderPlacer(c *client.Client) {
 		marketSellOrder := &client.PlaceOrderParams{
 			UserID: 666,
 			Bid:    false,
-			Size:   3_000,
+			Size:   100,
 		}
 
 		orderResp, err = c.PlaceMarketOrder(marketSellOrder)
@@ -47,7 +47,7 @@ func marketOrderPlacer(c *client.Client) {
 		marketBuyOrder := &client.PlaceOrderParams{
 			UserID: 666,
 			Bid:    true,
-			Size:   1_000,
+			Size:   100,
 		}
 
 		orderResp, err = c.PlaceMarketOrder(marketBuyOrder)
