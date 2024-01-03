@@ -86,7 +86,26 @@ func TestPlaceMarketMultifill(t *testing.T) {
 
 }
 
-func TestCancelOrder(t *testing.T) {
+func TestCancelAskOrder(t *testing.T) {
+	ob := NewOrderbook()
+	sellOrder := NewOrder(false, 4, 0)
+	price := 10_000.0
+	ob.PlaceLimitOrder(price, sellOrder)
+
+	assert(t, ob.AskTotalVolume(), 4.0)
+
+	ob.CancelOrder(sellOrder)
+
+	assert(t, ob.AskTotalVolume(), 0.0)
+
+	_, ok := ob.Orders[sellOrder.ID]
+	assert(t, ok, false)
+
+	_, ok = ob.AskLimits[price]
+	assert(t, ok, false)
+}
+
+func TestCancelBidOrder(t *testing.T) {
 	ob := NewOrderbook()
 	buyOrder := NewOrder(true, 4, 0)
 	price := 10_000.0
