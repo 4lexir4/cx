@@ -110,6 +110,9 @@ func (l *Limit) Fill(o *Order) []Match {
 	)
 
 	for _, order := range l.Orders {
+		if o.IsFilled() {
+			break
+		}
 		match := l.fillOrder(order, o)
 		matches = append(matches, match)
 
@@ -117,10 +120,6 @@ func (l *Limit) Fill(o *Order) []Match {
 
 		if order.IsFilled() {
 			ordersToDelete = append(ordersToDelete, order)
-		}
-
-		if o.IsFilled() {
-			break
 		}
 	}
 
