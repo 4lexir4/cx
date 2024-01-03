@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	maxOrders = 3
-	userID    = 7
+	userID = 7
 )
 
 var (
@@ -22,10 +21,20 @@ var (
 func marketOrderPlacer(c *client.Client) {
 	ticker := time.NewTicker(5 * time.Second)
 	for {
+
+		trades, err := c.GetTrades("ETH")
+		if err != nil {
+			panic(err)
+		}
+
+		if len(trades) > 0 {
+			fmt.Printf("EXCHANGE PRICE: %.2f\n", trades[len(trades)-1].Price)
+		}
+
 		otherMarketSellOrder := &client.PlaceOrderParams{
 			UserID: 8,
 			Bid:    false,
-			Size:   100,
+			Size:   1000,
 		}
 
 		orderResp, err := c.PlaceMarketOrder(otherMarketSellOrder)
