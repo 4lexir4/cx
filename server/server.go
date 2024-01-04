@@ -18,6 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/sirupsen/logrus"
 
 	"github.com/4lexir4/cx/orderbook"
 	"github.com/labstack/echo/v4"
@@ -361,7 +362,11 @@ func (ex *Exchange) handlePlaceMarketOrder(market Market, order *orderbook.Order
 		sumPrice += matches[i].Price
 	}
 	avgPrice := sumPrice / float64(len(matches))
-	log.Printf("Filled market order => ID: [%d] | size: [%.2f] | avgPrice: [%.2f]", order.ID, totalSizeFilled, avgPrice)
+	logrus.WithFields(logrus.Fields{
+		"type":     order.Type(),
+		"size":     totalSizeFilled,
+		"avgPrice": avgPrice,
+	}).Info("filled market order")
 
 	newOrderMap := make(map[int64][]*orderbook.Order)
 	ex.mu.Lock()

@@ -34,7 +34,7 @@ func marketOrderPlacer(c *client.Client) {
 		otherMarketSellOrder := &client.PlaceOrderParams{
 			UserID: 8,
 			Bid:    false,
-			Size:   1000,
+			Size:   10,
 		}
 
 		orderResp, err := c.PlaceMarketOrder(otherMarketSellOrder)
@@ -45,7 +45,7 @@ func marketOrderPlacer(c *client.Client) {
 		marketSellOrder := &client.PlaceOrderParams{
 			UserID: 666,
 			Bid:    false,
-			Size:   100,
+			Size:   10,
 		}
 
 		orderResp, err = c.PlaceMarketOrder(marketSellOrder)
@@ -56,7 +56,7 @@ func marketOrderPlacer(c *client.Client) {
 		marketBuyOrder := &client.PlaceOrderParams{
 			UserID: 666,
 			Bid:    true,
-			Size:   100,
+			Size:   10,
 		}
 
 		orderResp, err = c.PlaceMarketOrder(marketBuyOrder)
@@ -132,7 +132,7 @@ func seedMarket(c *client.Client) error {
 		UserID: 8,
 		Bid:    false,
 		Price:  10_000,
-		Size:   10_000,
+		Size:   100,
 	}
 	_, err := c.PlaceLimitOrder(ask)
 	if err != nil {
@@ -143,7 +143,7 @@ func seedMarket(c *client.Client) error {
 		UserID: 8,
 		Bid:    true,
 		Price:  9_000,
-		Size:   10_000,
+		Size:   100,
 	}
 	_, err = c.PlaceLimitOrder(bid)
 	if err != nil {
@@ -165,7 +165,7 @@ func main() {
 
 	//go makeMarketSimple(c)
 	//time.Sleep(1 * time.Second)
-	//marketOrderPlacer(c)
+	marketOrderPlacer(c)
 
 	select {}
 }
