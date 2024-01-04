@@ -40,7 +40,7 @@ func marketOrderPlacer(c *client.Client) {
 	for {
 		randInt := rand.Intn(10)
 		bid := true
-		if randInt > 5 {
+		if randInt > 7 {
 			bid = false
 		}
 

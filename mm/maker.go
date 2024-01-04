@@ -66,7 +66,7 @@ func (mm *MarketMaker) makerLoop() {
 			break
 		}
 
-		if bestAsk == 0 && bestBid == 0 {
+		if bestAsk.Price == 0 && bestBid.Price == 0 {
 			if err := mm.SeedMarket(); err != nil {
 				logrus.Error(err)
 				break
@@ -74,21 +74,26 @@ func (mm *MarketMaker) makerLoop() {
 			continue
 		}
 
-		spread := bestAsk - bestBid
-		//logrus.WithFields(logrus.Fields{
-		//	"spread": spread,
-		//}).Info()
+		if bestBid.Price == 0 {
+			bestBid.Price = bestAsk.Price - mm.priceOffset*2
+		}
+
+		if bestAsk.Price == 0 {
+			bestAsk.Price = bestBid.Price + mm.priceOffset*2
+		}
+
+		spread := bestAsk.Price - bestBid.Price
 
 		if spread <= mm.minSpread {
 			continue
 		}
 
-		if err := mm.placeOrder(true, bestBid+mm.priceOffset); err != nil {
+		if err := mm.placeOrder(true, bestBid.Price+mm.priceOffset); err != nil {
 			logrus.Error(err)
 			break
 		}
 
-		if err := mm.placeOrder(false, bestAsk-mm.priceOffset); err != nil {
+		if err := mm.placeOrder(false, bestAsk.Price-mm.priceOffset); err != nil {
 			logrus.Error(err)
 			break
 		}
