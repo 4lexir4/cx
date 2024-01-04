@@ -390,8 +390,6 @@ func (ex *Exchange) handlePlaceLimitOrder(market Market, price float64, order *o
 	ex.Orders[order.UserID] = append(ex.Orders[order.UserID], order)
 	ex.mu.Unlock()
 
-	log.Printf("New LIMIT order => type: [%t] | price: [%.2f] | size: [%.2f]", order.Bid, order.Limit.Price, order.Size)
-
 	return nil
 }
 

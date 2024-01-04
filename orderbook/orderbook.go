@@ -6,6 +6,8 @@ import (
 	"sort"
 	"sync"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Trade struct {
@@ -51,6 +53,13 @@ func NewOrder(bid bool, size float64, userID int64) *Order {
 
 func (o *Order) String() string {
 	return fmt.Sprintf("[size: %.2f]", o.Size)
+}
+
+func (o *Order) Type() string {
+	if o.Bid {
+		return "BID"
+	}
+	return "ASK"
 }
 
 func (o *Order) IsFilled() bool { return o.Size == 0.0 }
@@ -261,6 +270,14 @@ func (ob *Orderbook) PlaceLimitOrder(price float64, o *Order) {
 			ob.AskLimits[price] = limit
 		}
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"price":  limit.Price,
+		"type":   o.Type(),
+		"size":   o.Size,
+		"userID": o.UserID,
+	}).Info("new limit order")
+
 	ob.Orders[o.ID] = o
 	limit.AddOrder(o)
 }
