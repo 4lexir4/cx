@@ -72,6 +72,17 @@ func (mm *MarketMaker) makerLoop() {
 	}
 }
 
+func (mm *MarketMaker) placeOrder(bid bool, price float64) error {
+	bidOrder := &client.PlaceOrderParams{
+		UserID: mm.userID,
+		Bid:    bid,
+		Price:  price,
+		Size:   mm.orderSize,
+	}
+	_, err := mm.exchnageClient.PlaceLimitOrder(bidOrder)
+	return err
+}
+
 func (mm *MarketMaker) SeedMarket() error {
 	currentPrice := simulateFetchCurrentETHPrice()
 
