@@ -163,9 +163,9 @@ func main() {
 		panic(err)
 	}
 
-	go makeMarketSimple(c)
-	time.Sleep(1 * time.Second)
-	marketOrderPlacer(c)
+	//go makeMarketSimple(c)
+	//time.Sleep(1 * time.Second)
+	//marketOrderPlacer(c)
 
 	select {}
 }
