@@ -22,6 +22,7 @@ func main() {
 		SeedOffset:     40,
 		ExchnageClient: c,
 		UserID:         8,
+		PriceOffset:    10,
 	}
 	maker := mm.NewMarketMaker(cfg)
 

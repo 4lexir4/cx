@@ -14,6 +14,7 @@ type Config struct {
 	SeedOffset     float64
 	ExchnageClient *client.Client
 	MakeInterval   time.Duration
+	PriceOffset    float64
 }
 
 type MarketMaker struct {
@@ -23,6 +24,7 @@ type MarketMaker struct {
 	seedOffset     float64
 	exchnageClient *client.Client
 	makeInterval   time.Duration
+	priceOffset    float64
 }
 
 func NewMarketMaker(cfg Config) *MarketMaker {
@@ -33,6 +35,7 @@ func NewMarketMaker(cfg Config) *MarketMaker {
 		seedOffset:     cfg.SeedOffset,
 		exchnageClient: cfg.ExchnageClient,
 		makeInterval:   cfg.MakeInterval,
+		priceOffset:    cfg.PriceOffset,
 	}
 }
 
@@ -42,6 +45,7 @@ func (mm *MarketMaker) Start() {
 		"orderSize":    mm.orderSize,
 		"makeInterval": mm.makeInterval,
 		"minSpread":    mm.minSpread,
+		"priceOffset":  mm.priceOffset,
 	}).Info("starting market maker")
 	go mm.makerLoop()
 }
@@ -79,12 +83,12 @@ func (mm *MarketMaker) makerLoop() {
 			continue
 		}
 
-		if err := mm.placeOrder(true, bestBid+10); err != nil {
+		if err := mm.placeOrder(true, bestBid+mm.priceOffset); err != nil {
 			logrus.Error(err)
 			break
 		}
 
-		if err := mm.placeOrder(false, bestAsk-10); err != nil {
+		if err := mm.placeOrder(false, bestAsk-mm.priceOffset); err != nil {
 			logrus.Error(err)
 			break
 		}
