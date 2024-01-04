@@ -97,30 +97,9 @@ func StartServer() {
 		log.Fatal(err)
 	}
 
-	//buyerAddressStr := "0x28a8746e75304c0780E011BEd21C72cD78cd535E"
-	//buyerBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(buyerAddressStr), nil)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println("Buyer balance:", buyerBalance)
-
-	//sellerAddressStr := "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"
-	//sellerBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(sellerAddressStr), nil)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println("Seller balance:", sellerBalance)
-
 	ex.registerUser("a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3", 7)
 	ex.registerUser("a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3", 8)
 	ex.registerUser("e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52", 666)
-
-	//johnAddressStr := "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"
-	//johnBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(johnAddressStr), nil)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Println("John balance:", johnBalance)
 
 	e.POST("/order", ex.handlePlaceOrder)
 
@@ -288,33 +267,37 @@ type PriceResponse struct {
 }
 
 func (ex *Exchange) handleGetBestBid(c echo.Context) error {
-	market := Market(c.Param("market"))
-	ob := ex.orderbooks[market]
+	var (
+		market = Market(c.Param("market"))
+		ob     = ex.orderbooks[market]
+		pr     = PriceResponse{
+			Price: 0.0,
+		}
+	)
 
 	if len(ob.Bids()) == 0 {
-		return fmt.Errorf("Bids are empty")
+		return c.JSON(http.StatusOK, pr)
 	}
 
-	bestBidPrice := ob.Bids()[0].Price
-	pr := PriceResponse{
-		Price: bestBidPrice,
-	}
+	pr.Price = ob.Bids()[0].Price
 
 	return c.JSON(http.StatusOK, pr)
 }
 
 func (ex *Exchange) handleGetBestAsk(c echo.Context) error {
-	market := Market(c.Param("market"))
-	ob := ex.orderbooks[market]
+	var (
+		market = Market(c.Param("market"))
+		ob     = ex.orderbooks[market]
+		pr     = PriceResponse{
+			Price: 0.0,
+		}
+	)
 
 	if len(ob.Asks()) == 0 {
-		return fmt.Errorf("Asks are empty")
+		return c.JSON(http.StatusOK, pr)
 	}
 
-	bestAskPrice := ob.Asks()[0].Price
-	pr := PriceResponse{
-		Price: bestAskPrice,
-	}
+	pr.Price = ob.Asks()[0].Price
 
 	return c.JSON(http.StatusOK, pr)
 }
