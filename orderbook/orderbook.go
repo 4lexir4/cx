@@ -244,6 +244,10 @@ func (ob *Orderbook) PlaceMarketOrder(o *Order) []Match {
 		ob.Trade = append(ob.Trade, trade)
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"currentPrice": ob.Trade[len(ob.Trade)-1].Price,
+	}).Info()
+
 	return matches
 }
 

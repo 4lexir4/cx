@@ -67,6 +67,26 @@ func (mm *MarketMaker) makerLoop() {
 				logrus.Error(err)
 				break
 			}
+			continue
+		}
+
+		spread := bestAsk - bestBid
+		//logrus.WithFields(logrus.Fields{
+		//	"spread": spread,
+		//}).Info()
+
+		if spread <= mm.minSpread {
+			continue
+		}
+
+		if err := mm.placeOrder(true, bestBid+10); err != nil {
+			logrus.Error(err)
+			break
+		}
+
+		if err := mm.placeOrder(false, bestAsk-10); err != nil {
+			logrus.Error(err)
+			break
 		}
 		<-ticker.C
 	}
