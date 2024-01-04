@@ -97,38 +97,30 @@ func StartServer() {
 		log.Fatal(err)
 	}
 
-	buyerAddressStr := "0x28a8746e75304c0780E011BEd21C72cD78cd535E"
-	buyerBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(buyerAddressStr), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Buyer balance:", buyerBalance)
+	//buyerAddressStr := "0x28a8746e75304c0780E011BEd21C72cD78cd535E"
+	//buyerBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(buyerAddressStr), nil)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println("Buyer balance:", buyerBalance)
 
-	sellerAddressStr := "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"
-	sellerBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(sellerAddressStr), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Seller balance:", sellerBalance)
+	//sellerAddressStr := "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"
+	//sellerBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(sellerAddressStr), nil)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println("Seller balance:", sellerBalance)
 
-	pkStr7 := "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"
-	user7 := NewUser(pkStr7, 7)
-	ex.Users[user7.ID] = user7
+	ex.registerUser("a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3", 7)
+	ex.registerUser("a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3", 8)
+	ex.registerUser("e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52", 666)
 
-	pkStr8 := "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"
-	user8 := NewUser(pkStr8, 8)
-	ex.Users[user8.ID] = user8
-
-	johnPk := "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52"
-	john := NewUser(johnPk, 666)
-	ex.Users[john.ID] = john
-
-	johnAddressStr := "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"
-	johnBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(johnAddressStr), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("John balance:", johnBalance)
+	//johnAddressStr := "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"
+	//johnBalance, err := client.BalanceAt(context.Background(), common.HexToAddress(johnAddressStr), nil)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println("John balance:", johnBalance)
 
 	e.POST("/order", ex.handlePlaceOrder)
 
@@ -184,6 +176,15 @@ func NewExchange(privateKey string, client *ethclient.Client) (*Exchange, error)
 type GetOrdersResponse struct {
 	Asks []Order
 	Bids []Order
+}
+
+func (ex *Exchange) registerUser(pk string, userID int64) {
+	user := NewUser(pk, userID)
+	ex.Users[user.ID] = user
+
+	logrus.WithFields(logrus.Fields{
+		"id": userID,
+	}).Info("new exchange user")
 }
 
 func (ex *Exchange) handleGetTrades(c echo.Context) error {
