@@ -32,5 +32,9 @@ Make account at:
 ## Frontend
 ### Install:
 
+## Taildwindcss
+```https://tailwindcss.com/docs/guides/nextjs```
 
+## Ethers
+```yarn add ethers```
 
