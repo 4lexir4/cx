@@ -1,6 +1,6 @@
-# Crypto Exchange backend from scratch (in development)
+# Crypto exchange backend (from scratch)
 
-## Install:
+## Dependencies (for building and playing with):
 
 ## Postman
 Make account at:
