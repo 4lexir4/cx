@@ -1,5 +1,12 @@
 # Crypto exchange backend (from scratch)
 
+**NOTE**:
+Make sure you start ganache before running. Use 
+
+```$ ganache -d```
+
+(```-d``` options is for deterministic, as the code in its current form uses address from it (for reproducibility) - feel free to play with it)
+
 ## Dependencies (for building and playing with):
 
 ## Postman
