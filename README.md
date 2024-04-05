@@ -1,3 +1,6 @@
+## 
+Contributing
+
 # Crypto exchange (backend from scratch)
 
 **NOTE**:
@@ -37,6 +40,4 @@ Make account at:
 
 ## TODO:
 - Add frontend
-
-## 🤝 Contributing
 
